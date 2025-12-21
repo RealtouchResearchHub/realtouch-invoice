@@ -59,6 +59,7 @@ export default function Dashboard({ user, setUser }) {
   useEffect(() => {
     fetchInvoices();
     fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, typeFilter]);
 
   const fetchInvoices = async () => {

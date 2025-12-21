@@ -82,7 +82,7 @@ export default function UpgradeModal({ onClose, user, downloadsUsed }) {
             </div>
             <div>
               <h2 className="font-space-mono text-xl font-bold text-slate-900">Download Limit Reached</h2>
-              <p className="text-sm text-slate-500">You've used all {downloadsUsed} free downloads</p>
+              <p className="text-sm text-slate-500">You&apos;ve used all {downloadsUsed} free downloads</p>
             </div>
           </div>
           <button 
@@ -105,7 +105,7 @@ export default function UpgradeModal({ onClose, user, downloadsUsed }) {
 
           {/* Benefits */}
           <div className="mb-6">
-            <h3 className="font-semibold text-slate-900 mb-3">What you'll get:</h3>
+            <h3 className="font-semibold text-slate-900 mb-3">What you&apos;ll get:</h3>
             <ul className="space-y-2">
               <li className="flex items-center gap-2 text-slate-600">
                 <Check className="w-5 h-5 text-emerald-500" />
