@@ -390,7 +390,8 @@ async def create_invoice(
     await db.invoices.insert_one(invoice)
     
     # Return without _id
-    del invoice["_id"] if "_id" in invoice else None
+    if "_id" in invoice:
+        del invoice["_id"]
     return invoice
 
 @api_router.put("/invoices/{invoice_id}")
@@ -651,7 +652,8 @@ async def create_customer(
     }
     
     await db.customers.insert_one(customer)
-    del customer["_id"] if "_id" in customer else None
+    if "_id" in customer:
+        del customer["_id"]
     return customer
 
 @api_router.put("/customers/{customer_id}")
