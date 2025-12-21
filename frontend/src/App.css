@@ -1,34 +1,169 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
-}
+/* Main App Styles - Realtouch Invoice */
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
-}
-
-.App-header {
-    background-color: #0f0f10;
+/* Remove default center alignment */
+.App {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
 }
 
-.App-link {
-    color: #61dafb;
+/* Hero section background */
+.hero-bg {
+    background-image: url('https://images.unsplash.com/photo-1553873967-e2d1b47ad083?crop=entropy&cs=srgb&fm=jpg&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    position: relative;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
+.hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.92);
+}
+
+/* Invoice preview card */
+.invoice-preview {
+    aspect-ratio: 1 / 1.414;
+    transform: perspective(1000px) rotateY(-6deg) rotateX(2deg);
+    transition: transform 0.3s ease;
+}
+
+.invoice-preview:hover {
+    transform: perspective(1000px) rotateY(-3deg) rotateX(1deg) translateY(-5px);
+}
+
+/* Sidebar styles */
+.sidebar {
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+}
+
+/* Status badges */
+.badge-paid {
+    @apply bg-emerald-100 text-emerald-700 border border-emerald-200;
+}
+
+.badge-pending, .badge-unpaid {
+    @apply bg-amber-100 text-amber-700 border border-amber-200;
+}
+
+.badge-overdue {
+    @apply bg-red-100 text-red-700 border border-red-200;
+}
+
+/* Button styles */
+.btn-primary {
+    @apply bg-[#0066cc] text-white hover:bg-[#0052a3] rounded-md px-6 py-2.5 font-medium transition-colors shadow-sm hover:shadow-md;
+}
+
+.btn-secondary {
+    @apply bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 rounded-md px-6 py-2.5 font-medium transition-colors;
+}
+
+.btn-ghost {
+    @apply text-slate-600 hover:text-[#0066cc] hover:bg-blue-50 rounded-md px-4 py-2 transition-colors;
+}
+
+/* Card styles */
+.card {
+    @apply bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300;
+}
+
+/* Input styles */
+.input-field {
+    @apply bg-white border border-slate-200 rounded-md px-4 py-2 focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc] transition-colors outline-none;
+}
+
+/* Table styles */
+.table-striped tbody tr:nth-child(even) {
+    @apply bg-slate-50;
+}
+
+/* Download progress */
+.download-progress {
+    @apply h-2 rounded-full bg-slate-200 overflow-hidden;
+}
+
+.download-progress-bar {
+    @apply h-full rounded-full transition-all duration-300;
+}
+
+.download-progress-bar.warning {
+    @apply bg-amber-500;
+}
+
+.download-progress-bar.danger {
+    @apply bg-red-500;
+}
+
+.download-progress-bar.normal {
+    @apply bg-[#0066cc];
+}
+
+/* Modal overlay */
+.modal-overlay {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center;
+}
+
+/* Feature grid bento layout */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+}
+
+.bento-item-large {
+    grid-column: span 8;
+}
+
+.bento-item-small {
+    grid-column: span 4;
+}
+
+@media (max-width: 768px) {
+    .bento-item-large,
+    .bento-item-small {
+        grid-column: span 12;
     }
-    to {
-        transform: rotate(360deg);
+}
+
+/* Pricing card highlight */
+.pricing-highlight {
+    position: relative;
+    z-index: 1;
+}
+
+.pricing-highlight::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    background: linear-gradient(135deg, #0066cc 0%, #10b981 50%, #0066cc 100%);
+    border-radius: inherit;
+    z-index: -1;
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Loading spinner */
+.spinner {
+    @apply animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full;
+}
+
+/* Tooltip */
+.tooltip {
+    @apply absolute z-50 px-2 py-1 text-xs bg-slate-900 text-white rounded shadow-lg whitespace-nowrap;
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .print-only {
+        display: block !important;
     }
 }
