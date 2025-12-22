@@ -1279,7 +1279,7 @@ async def get_stats(user: dict = Depends(get_current_user)):
     
     user_doc = await db.users.find_one({"user_id": user["user_id"]}, {"_id": 0})
     
-    recurring_count = len([inv for inv in invoices if inv.get("recurring", {}).get("enabled")])
+    recurring_count = len([inv for inv in invoices if (inv.get("recurring") or {}).get("enabled")])
     
     return {
         "total_revenue": total_revenue,
