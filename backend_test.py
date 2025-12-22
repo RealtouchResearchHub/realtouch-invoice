@@ -13,7 +13,7 @@ from typing import Dict, Any, Optional
 class RealtouchInvoiceAPITester:
     def __init__(self, base_url: str = "https://billpro-app-2.preview.emergentagent.com"):
         self.base_url = base_url.rstrip('/')
-        self.session_token = None
+        self.session_token = "test_session_1766360147256"  # Use provided test session
         self.test_user_id = None
         self.tests_run = 0
         self.tests_passed = 0
