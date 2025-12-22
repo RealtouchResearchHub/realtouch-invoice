@@ -6,6 +6,7 @@ import LandingPage from "@/pages/LandingPage";
 import Dashboard from "@/pages/Dashboard";
 import AuthCallback from "@/pages/AuthCallback";
 import PaymentSuccess from "@/pages/PaymentSuccess";
+import LoginPage from "@/pages/LoginPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
