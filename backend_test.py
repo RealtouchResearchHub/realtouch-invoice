@@ -210,15 +210,21 @@ class RealtouchInvoiceAPITester:
         success, data = self.make_request('POST', '/invoices', invoice_data, 201)
         if success and data.get('invoice_id'):
             self.test_invoice_id = data['invoice_id']
-            # Check if from fields are saved
-            if (data.get('from_company_name') == "Custom Company Name Ltd" and
+            # Check if from fields are saved - they should all be present in response
+            from_fields_correct = (
+                data.get('from_company_name') == "Custom Company Name Ltd" and
                 data.get('from_trading_name') == "Custom Trading Name" and
-                data.get('from_tagline') == "Custom Company Tagline"):
+                data.get('from_tagline') == "Custom Company Tagline" and
+                data.get('from_registration_number') == "87654321" and
+                data.get('from_email') == "billing@customcompany.com"
+            )
+            if from_fields_correct:
                 self.log_test("Invoice with From Fields", True, 
                             "Invoice created with custom from fields successfully")
             else:
                 self.log_test("Invoice with From Fields", False, 
-                            "From fields not saved correctly", data)
+                            "From fields not saved correctly", 
+                            f"Expected custom values, got: company={data.get('from_company_name')}, trading={data.get('from_trading_name')}")
         else:
             self.log_test("Invoice with From Fields", False, "Failed to create invoice with from fields", data)
 
