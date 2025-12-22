@@ -370,7 +370,8 @@ class RealtouchInvoiceAPITester:
 
         success, data = self.make_request('POST', '/invoices', invoice_data, 201)
         if success and data.get('invoice_id'):
-            self.test_invoice_id = data['invoice_id']
+            if not self.test_invoice_id:  # Only set if not already set by previous test
+                self.test_invoice_id = data['invoice_id']
             # Verify tax calculation
             expected_subtotal = 600.0
             expected_tax = 120.0  # 20% of 600
