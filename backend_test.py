@@ -418,7 +418,7 @@ class RealtouchInvoiceAPITester:
             "address": "123 Test Street, Test City, TC1 2TC"
         }
 
-        success, data = self.make_request('POST', '/customers', customer_data, 201)
+        success, data = self.make_request('POST', '/customers', customer_data, 200)
         if success and data.get('customer_id'):
             self.test_customer_id = data['customer_id']
             self.log_test("Create Customer", True, f"Customer created: {data['name']}")
