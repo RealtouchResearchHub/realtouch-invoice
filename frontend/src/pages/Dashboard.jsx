@@ -334,8 +334,21 @@ export default function Dashboard({ user, setUser }) {
           </button>
         </nav>
 
-        {/* Download Limit (for Starter plan) */}
-        {user?.plan === "starter" && (
+        {/* Owner Badge */}
+        {(user?.is_owner || stats?.is_owner) && (
+          <div className="p-4 mx-4 mb-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg">
+            <div className="flex items-center gap-2 text-white">
+              <span className="text-lg">👑</span>
+              <div>
+                <p className="font-bold text-sm">Owner Access</p>
+                <p className="text-xs opacity-90">Unlimited everything</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Download Limit (for Starter plan only - not for owners) */}
+        {user?.plan === "starter" && !user?.is_owner && !stats?.is_owner && (
           <div className="p-4 mx-4 mb-4 bg-slate-800 rounded-lg">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-slate-300">Downloads Used</span>
