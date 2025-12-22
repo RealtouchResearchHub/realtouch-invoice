@@ -1299,14 +1299,19 @@ async def get_stats(user: dict = Depends(get_current_user)):
     
     recurring_count = len([inv for inv in invoices if (inv.get("recurring") or {}).get("enabled")])
     
+    # Check if owner
+    user_is_owner = is_owner(user_doc)
+    effective_plan = get_effective_plan(user_doc)
+    
     return {
         "total_revenue": total_revenue,
         "total_unpaid": total_unpaid,
         "this_month_revenue": this_month_revenue,
         "invoice_count": len(invoices),
         "downloads_used": user_doc.get("download_count", 0),
-        "downloads_limit": 5 if user_doc.get("plan") == "starter" else -1,
-        "plan": user_doc.get("plan", "starter"),
+        "downloads_limit": -1 if user_is_owner or user_doc.get("plan") != "starter" else 5,  # -1 = unlimited
+        "plan": effective_plan,
+        "is_owner": user_is_owner,
         "recurring_invoices": recurring_count
     }
 
