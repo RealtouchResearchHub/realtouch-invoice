@@ -787,6 +787,75 @@ export default function Dashboard({ user, setUser }) {
         </Dialog>
       )}
 
+      {/* Email Invoice Modal */}
+      {showEmailModal && (
+        <Dialog open={!!showEmailModal} onOpenChange={() => setShowEmailModal(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-[#0066cc]" />
+                Send Invoice via Email
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Recipient Email *</Label>
+                <Input 
+                  type="email"
+                  placeholder="customer@example.com"
+                  value={emailData.recipient_email}
+                  onChange={(e) => setEmailData({...emailData, recipient_email: e.target.value})}
+                  data-testid="email-recipient-input"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Subject</Label>
+                <Input 
+                  placeholder="Invoice subject"
+                  value={emailData.subject}
+                  onChange={(e) => setEmailData({...emailData, subject: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Message</Label>
+                <Textarea 
+                  placeholder="Add a personal message..."
+                  value={emailData.message}
+                  onChange={(e) => setEmailData({...emailData, message: e.target.value})}
+                  rows={3}
+                />
+              </div>
+              <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-700">
+                The invoice PDF will be attached to the email automatically.
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEmailModal(null)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={sendInvoiceEmail}
+                className="bg-[#0066cc] hover:bg-[#0052a3] text-white"
+                disabled={sendingEmail}
+                data-testid="send-email-btn"
+              >
+                {sendingEmail ? (
+                  <>
+                    <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Send Invoice
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
       {/* Upgrade Modal */}
       {showUpgradeModal && (
         <UpgradeModal 
