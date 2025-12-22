@@ -41,11 +41,20 @@ export default function LoginPage() {
         body: JSON.stringify(payload)
       });
 
-      const data = await response.json();
-
+      // Clone response before reading to avoid "body stream already read" error
+      const responseClone = response.clone();
+      
       if (!response.ok) {
-        throw new Error(data.detail || "Authentication failed");
+        // Try to get error message from response
+        try {
+          const errorData = await responseClone.json();
+          throw new Error(errorData.detail || "Authentication failed");
+        } catch {
+          throw new Error("Authentication failed. Please try again.");
+        }
       }
+
+      const data = await response.json();
 
       // Store token and redirect
       if (data.session_token) {
