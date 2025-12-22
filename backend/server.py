@@ -706,6 +706,120 @@ async def logout(request: Request, response: Response):
     response.delete_cookie(key="session_token", path="/")
     return {"message": "Logged out"}
 
+# ========== EMAIL/PASSWORD AUTH ENDPOINTS ==========
+
+@api_router.post("/auth/signup")
+async def signup(user_data: UserSignup, response: Response):
+    """Sign up with email and password"""
+    # Check if email already exists
+    existing = await db.users.find_one({"email": user_data.email.lower()}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered. Please login instead.")
+    
+    # Create new user
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    password_hash = hash_password(user_data.password)
+    
+    new_user = {
+        "user_id": user_id,
+        "email": user_data.email.lower(),
+        "name": user_data.name,
+        "picture": None,
+        "plan": "starter",
+        "download_count": 0,
+        "email_verified": False,
+        "password_hash": password_hash,
+        "auth_provider": "email",
+        "company_details": {
+            "name": "Realtouch Global Ventures Ltd",
+            "trading_name": None,
+            "registration_number": "16578193",
+            "address": None,
+            "tagline": None
+        },
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.users.insert_one(new_user)
+    
+    # Create session
+    session_token = f"sess_{uuid.uuid4().hex}"
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    
+    await db.user_sessions.insert_one({
+        "user_id": user_id,
+        "session_token": session_token,
+        "expires_at": expires_at.isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        path="/",
+        max_age=7 * 24 * 60 * 60
+    )
+    
+    # Remove sensitive data from response
+    user_response = {k: v for k, v in new_user.items() if k != "password_hash"}
+    user_response["is_owner"] = is_owner(user_response)
+    user_response["effective_plan"] = get_effective_plan(user_response)
+    
+    # Send verification email
+    asyncio.create_task(send_verification_email(user_data.email, user_data.name))
+    
+    return {"user": user_response, "session_token": session_token}
+
+@api_router.post("/auth/login")
+async def login(user_data: UserLogin, response: Response):
+    """Login with email and password"""
+    user = await db.users.find_one({"email": user_data.email.lower()}, {"_id": 0})
+    
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    # Check if user was created via Google OAuth (no password)
+    if not user.get("password_hash"):
+        raise HTTPException(status_code=401, detail="This account uses Google Sign-In. Please use Google to login.")
+    
+    # Verify password
+    if not verify_password(user_data.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    # Create session
+    session_token = f"sess_{uuid.uuid4().hex}"
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    
+    # Remove old sessions
+    await db.user_sessions.delete_many({"user_id": user["user_id"]})
+    
+    await db.user_sessions.insert_one({
+        "user_id": user["user_id"],
+        "session_token": session_token,
+        "expires_at": expires_at.isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        path="/",
+        max_age=7 * 24 * 60 * 60
+    )
+    
+    # Remove sensitive data from response
+    user_response = {k: v for k, v in user.items() if k != "password_hash"}
+    user_response["is_owner"] = is_owner(user_response)
+    user_response["effective_plan"] = get_effective_plan(user_response)
+    
+    return {"user": user_response, "session_token": session_token}
+
 # ========== USER ENDPOINTS ==========
 
 @api_router.get("/user/profile")
