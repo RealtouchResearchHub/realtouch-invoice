@@ -893,13 +893,18 @@ async def download_invoice(
     format: str = "pdf",
     user: dict = Depends(get_current_user)
 ):
-    """Download invoice as PDF with PERMANENT limit enforcement"""
+    """Download invoice as PDF with PERMANENT limit enforcement (bypassed for owners)"""
     user_doc = await db.users.find_one(
         {"user_id": user["user_id"]},
         {"_id": 0}
     )
     
-    if user_doc["plan"] == "starter" and user_doc["download_count"] >= 5:
+    # Check if user is owner - owners have unlimited access
+    user_is_owner = is_owner(user_doc)
+    effective_plan = get_effective_plan(user_doc)
+    
+    # ENFORCE PERMANENT DOWNLOAD LIMIT (skip for owners and paid plans)
+    if not user_is_owner and user_doc["plan"] == "starter" and user_doc["download_count"] >= 5:
         raise HTTPException(
             status_code=403,
             detail={
@@ -921,8 +926,8 @@ async def download_invoice(
     # Generate PDF
     buffer = generate_invoice_pdf(invoice, user_doc)
     
-    # INCREMENT DOWNLOAD COUNT (PERMANENT for starter plan)
-    if user_doc["plan"] == "starter":
+    # INCREMENT DOWNLOAD COUNT (only for starter plan, not owners)
+    if not user_is_owner and user_doc["plan"] == "starter":
         await db.users.update_one(
             {"user_id": user["user_id"]},
             {"$inc": {"download_count": 1}}
