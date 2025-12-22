@@ -398,11 +398,13 @@ export default function Dashboard({ user, setUser }) {
           </div>
           <div className="flex items-center justify-between text-xs">
             <span className={`px-2 py-1 rounded-full ${
-              user?.plan === "starter" 
-                ? "bg-slate-700 text-slate-300" 
-                : "bg-[#0066cc] text-white"
+              user?.is_owner || stats?.is_owner
+                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
+                : user?.plan === "starter" 
+                  ? "bg-slate-700 text-slate-300" 
+                  : "bg-[#0066cc] text-white"
             }`}>
-              {user?.plan?.charAt(0).toUpperCase() + user?.plan?.slice(1)} Plan
+              {user?.is_owner || stats?.is_owner ? '👑 Owner' : (user?.effective_plan || user?.plan)?.charAt(0).toUpperCase() + (user?.effective_plan || user?.plan)?.slice(1) + ' Plan'}
             </span>
             <button 
               onClick={handleLogout}
