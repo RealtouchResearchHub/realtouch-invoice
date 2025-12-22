@@ -666,6 +666,7 @@ export default function Dashboard({ user, setUser }) {
           invoice={editingInvoice}
           onClose={() => { setShowEditor(false); setEditingInvoice(null); }}
           onSaved={handleInvoiceSaved}
+          user={user}
         />
       )}
 
