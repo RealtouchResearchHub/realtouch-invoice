@@ -222,9 +222,10 @@ class RealtouchInvoiceAPITester:
                 self.log_test("Invoice with From Fields", True, 
                             "Invoice created with custom from fields successfully")
             else:
+                # Debug output
+                debug_info = f"company={data.get('from_company_name')}, trading={data.get('from_trading_name')}, tagline={data.get('from_tagline')}"
                 self.log_test("Invoice with From Fields", False, 
-                            "From fields not saved correctly", 
-                            f"Expected custom values, got: company={data.get('from_company_name')}, trading={data.get('from_trading_name')}")
+                            f"From fields not saved correctly. Got: {debug_info}")
         else:
             self.log_test("Invoice with From Fields", False, "Failed to create invoice with from fields", data)
 
