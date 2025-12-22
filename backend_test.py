@@ -313,13 +313,13 @@ class RealtouchInvoiceAPITester:
             self.log_test("Stats with Recurring Count", False, "Stats endpoint not working", data)
 
     def create_mock_session(self):
-        """Create a mock session for testing (since we can't do real OAuth in tests)"""
-        # Note: In a real scenario, this would go through the OAuth flow
-        # For testing, we'll create a mock user directly in the database if possible
-        # or skip auth-required tests
-        print("\n⚠️  Note: Authentication tests skipped - requires OAuth flow")
-        print("    Real authentication goes through auth.emergentagent.com")
-        return False
+        """Create a mock session for testing (using provided test session)"""
+        if self.session_token:
+            print(f"\n✅ Using provided test session token: {self.session_token}")
+            return True
+        else:
+            print("\n⚠️  Note: Authentication tests skipped - no session token provided")
+            return False
 
     def test_invoice_crud_operations(self):
         """Test invoice CRUD operations (requires auth)"""
