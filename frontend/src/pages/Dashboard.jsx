@@ -3,10 +3,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { 
   FileText, Users, BarChart3, Settings, LogOut, Plus, Search,
   Download, Edit, Trash2, Eye, ChevronDown, X, AlertCircle,
-  DollarSign, Clock, TrendingUp, CreditCard
+  DollarSign, Clock, TrendingUp, CreditCard, Mail, Upload, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { 
   Select, 
   SelectContent, 
@@ -26,6 +28,7 @@ import { toast } from "sonner";
 import InvoiceEditor from "@/components/InvoiceEditor";
 import CustomerManager from "@/components/CustomerManager";
 import UpgradeModal from "@/components/UpgradeModal";
+import SettingsPage from "@/components/SettingsPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
