@@ -595,6 +595,14 @@ export default function Dashboard({ user, setUser }) {
                                 <Download size={18} />
                               </button>
                               <button
+                                onClick={() => handleSendEmail(invoice)}
+                                className="p-2 text-slate-400 hover:text-purple-600 transition-colors"
+                                title="Send via Email"
+                                data-testid={`email-invoice-${invoice.invoice_id}`}
+                              >
+                                <Mail size={18} />
+                              </button>
+                              <button
                                 onClick={() => setShowDeleteConfirm(invoice)}
                                 className="p-2 text-slate-400 hover:text-red-600 transition-colors"
                                 title="Delete"
@@ -627,27 +635,7 @@ export default function Dashboard({ user, setUser }) {
         )}
 
         {activeTab === "settings" && (
-          <div className="max-w-2xl">
-            <h2 className="font-space-mono text-2xl font-bold text-slate-900 mb-6">Settings</h2>
-            <div className="card p-6 mb-6">
-              <h3 className="font-semibold text-slate-900 mb-4">Profile Information</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
-                  <Input value={user?.name || ''} disabled className="bg-slate-50" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                  <Input value={user?.email || ''} disabled className="bg-slate-50" />
-                </div>
-              </div>
-            </div>
-
-            <div className="card p-6">
-              <h3 className="font-semibold text-slate-900 mb-4">Subscription</h3>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-slate-900">
+          <SettingsPage user={user} setUser={setUser} onUpgrade={() => setShowUpgradeModal(true)} />
                     {user?.plan === "starter" ? "Starter Plan" : 
                      user?.plan === "professional" ? "Professional Plan" : "Enterprise Plan"}
                   </p>
