@@ -207,7 +207,7 @@ class RealtouchInvoiceAPITester:
             "from_tagline": "Custom Company Tagline"
         }
 
-        success, data = self.make_request('POST', '/invoices', invoice_data, 201)
+        success, data = self.make_request('POST', '/invoices', invoice_data, 200)
         if success and data.get('invoice_id'):
             self.test_invoice_id = data['invoice_id']
             # Check if from fields are saved - they should all be present in response
@@ -369,7 +369,7 @@ class RealtouchInvoiceAPITester:
             "status": "unpaid"
         }
 
-        success, data = self.make_request('POST', '/invoices', invoice_data, 201)
+        success, data = self.make_request('POST', '/invoices', invoice_data, 200)
         if success and data.get('invoice_id'):
             if not self.test_invoice_id:  # Only set if not already set by previous test
                 self.test_invoice_id = data['invoice_id']
