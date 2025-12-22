@@ -452,6 +452,18 @@ export default function Dashboard({ user, setUser }) {
 
       {/* Main Content */}
       <main className="flex-1 ml-64 p-8">
+        {/* Dashboard Home View */}
+        {activeTab === "dashboard" && (
+          <DashboardHome 
+            user={user}
+            stats={{...stats, customer_count: customers.length}}
+            invoices={invoices}
+            onNavigate={setActiveTab}
+            onCreateInvoice={() => { setEditingInvoice(null); setShowEditor(true); }}
+            onAddCustomer={() => setActiveTab("customers")}
+          />
+        )}
+
         {activeTab === "invoices" && (
           <>
             {/* Stats Grid */}
