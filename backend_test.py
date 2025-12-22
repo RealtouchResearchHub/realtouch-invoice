@@ -230,8 +230,12 @@ class RealtouchInvoiceAPITester:
 
     def test_invoice_email_sending(self):
         """Test POST /api/invoices/:id/send-email endpoint"""
-        if not self.session_token or not self.test_invoice_id:
-            self.log_test("Invoice Email Sending", False, "Skipped - no auth token or invoice")
+        if not self.session_token:
+            self.log_test("Invoice Email Sending", False, "Skipped - no auth token")
+            return
+            
+        if not self.test_invoice_id:
+            self.log_test("Invoice Email Sending", False, "Skipped - no test invoice available")
             return
 
         email_data = {
@@ -256,8 +260,12 @@ class RealtouchInvoiceAPITester:
 
     def test_recurring_invoice_configuration(self):
         """Test POST /api/invoices/:id/set-recurring endpoint"""
-        if not self.session_token or not self.test_invoice_id:
-            self.log_test("Recurring Invoice Config", False, "Skipped - no auth token or invoice")
+        if not self.session_token:
+            self.log_test("Recurring Invoice Config", False, "Skipped - no auth token")
+            return
+            
+        if not self.test_invoice_id:
+            self.log_test("Recurring Invoice Config", False, "Skipped - no test invoice available")
             return
 
         recurring_data = {
