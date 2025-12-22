@@ -173,6 +173,54 @@ export default function Dashboard({ user, setUser }) {
     }
   };
 
+  const handleSendEmail = async (invoice) => {
+    setEmailData({
+      recipient_email: invoice.customer_email || "",
+      subject: `Invoice ${invoice.invoice_number} from Realtouch Invoice`,
+      message: "Please find attached your invoice. We appreciate your business!"
+    });
+    setShowEmailModal(invoice);
+  };
+
+  const sendInvoiceEmail = async () => {
+    if (!emailData.recipient_email) {
+      toast.error("Recipient email is required");
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/invoices/${showEmailModal.invoice_id}/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          invoice_id: showEmailModal.invoice_id,
+          recipient_email: emailData.recipient_email,
+          subject: emailData.subject,
+          message: emailData.message
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.status === "success") {
+        toast.success("Invoice sent successfully!");
+        setShowEmailModal(null);
+      } else if (result.status === "skipped") {
+        toast.info("Email service not configured. Configure RESEND_API_KEY in backend.");
+        setShowEmailModal(null);
+      } else {
+        throw new Error(result.message || "Failed to send email");
+      }
+    } catch (error) {
+      console.error("Email error:", error);
+      toast.error("Failed to send invoice email");
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   const handleDeleteInvoice = async (invoiceId) => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/invoices/${invoiceId}`, {
