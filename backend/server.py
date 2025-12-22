@@ -84,6 +84,15 @@ class UserCreate(BaseModel):
     email: str
     picture: Optional[str] = None
 
+class UserSignup(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
 class User(BaseModel):
     model_config = ConfigDict(extra="ignore")
     user_id: str
