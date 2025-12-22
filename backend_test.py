@@ -94,11 +94,223 @@ class RealtouchInvoiceAPITester:
 
     def test_auth_me_without_token(self):
         """Test /auth/me without authentication (should fail)"""
+        # Temporarily remove token for this test
+        temp_token = self.session_token
+        self.session_token = None
+        
         success, data = self.make_request('GET', '/auth/me', expected_status=401)
         if success:
             self.log_test("Auth Protection", True, "Endpoints properly protected")
         else:
             self.log_test("Auth Protection", False, "Auth protection not working", data)
+            
+        # Restore token
+        self.session_token = temp_token
+
+    def test_auth_me_with_token(self):
+        """Test /auth/me with valid authentication token"""
+        success, data = self.make_request('GET', '/auth/me')
+        if success and data.get('user_id'):
+            self.test_user_id = data['user_id']
+            self.log_test("Auth Me Endpoint", True, f"Authenticated user: {data.get('name', 'Unknown')}")
+        else:
+            self.log_test("Auth Me Endpoint", False, "Failed to authenticate with test token", data)
+
+    def test_user_profile_update(self):
+        """Test PUT /api/user/profile with company_details"""
+        if not self.session_token:
+            self.log_test("Profile Update", False, "Skipped - no authentication token")
+            return
+
+        profile_data = {
+            "name": "Updated Test User",
+            "company_details": {
+                "name": "Test Company Ltd",
+                "trading_name": "Test Trading",
+                "registration_number": "12345678",
+                "address": "123 Test Street, Test City, TC1 2TC",
+                "email": "contact@testcompany.com",
+                "phone": "+44 123 456 7890",
+                "website": "www.testcompany.com",
+                "tagline": "Testing Excellence"
+            }
+        }
+
+        success, data = self.make_request('PUT', '/user/profile', profile_data)
+        if success and data.get('company_details'):
+            company_details = data['company_details']
+            if (company_details.get('name') == "Test Company Ltd" and 
+                company_details.get('trading_name') == "Test Trading"):
+                self.log_test("Profile Update with Company Details", True, 
+                            "Profile and company details updated successfully")
+            else:
+                self.log_test("Profile Update with Company Details", False, 
+                            "Company details not saved correctly", data)
+        else:
+            self.log_test("Profile Update with Company Details", False, 
+                        "Failed to update profile", data)
+
+    def test_logo_upload_endpoint(self):
+        """Test POST /api/user/upload-logo endpoint (without actual file)"""
+        if not self.session_token:
+            self.log_test("Logo Upload Endpoint", False, "Skipped - no authentication token")
+            return
+
+        # Test endpoint exists and returns proper error for missing file
+        import requests
+        url = f"{self.base_url}/api/user/upload-logo"
+        headers = {'Authorization': f'Bearer {self.session_token}'}
+        
+        try:
+            response = requests.post(url, headers=headers, timeout=10)
+            # Should return 422 for missing file
+            if response.status_code == 422:
+                self.log_test("Logo Upload Endpoint", True, 
+                            "Logo upload endpoint exists and validates file requirement")
+            else:
+                self.log_test("Logo Upload Endpoint", False, 
+                            f"Unexpected status code: {response.status_code}")
+        except Exception as e:
+            self.log_test("Logo Upload Endpoint", False, f"Request failed: {str(e)}")
+
+    def test_invoice_with_from_fields(self):
+        """Test invoice creation with from_ fields (Phase 2 feature)"""
+        if not self.session_token:
+            self.log_test("Invoice with From Fields", False, "Skipped - no authentication token")
+            return
+
+        invoice_data = {
+            "document_type": "Invoice",
+            "customer_name": "Test Customer Ltd",
+            "customer_address": "123 Customer Street, Customer City, CC1 2CC",
+            "customer_email": "test@customer.com",
+            "invoice_date": datetime.now().strftime("%Y-%m-%d"),
+            "due_date": (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d"),
+            "items": [
+                {
+                    "description": "Phase 2 Testing Services",
+                    "quantity": 5,
+                    "rate": 100.0,
+                    "amount": 500.0
+                }
+            ],
+            "tax_rate": 20.0,
+            "notes": "Test invoice with from fields",
+            "status": "unpaid",
+            # Phase 2: From section fields
+            "from_company_name": "Custom Company Name Ltd",
+            "from_trading_name": "Custom Trading Name",
+            "from_registration_number": "87654321",
+            "from_address": "456 Company Street, Company City, CC2 3CC",
+            "from_email": "billing@customcompany.com",
+            "from_phone": "+44 987 654 3210",
+            "from_tagline": "Custom Company Tagline"
+        }
+
+        success, data = self.make_request('POST', '/invoices', invoice_data, 201)
+        if success and data.get('invoice_id'):
+            self.test_invoice_id = data['invoice_id']
+            # Check if from fields are saved
+            if (data.get('from_company_name') == "Custom Company Name Ltd" and
+                data.get('from_trading_name') == "Custom Trading Name" and
+                data.get('from_tagline') == "Custom Company Tagline"):
+                self.log_test("Invoice with From Fields", True, 
+                            "Invoice created with custom from fields successfully")
+            else:
+                self.log_test("Invoice with From Fields", False, 
+                            "From fields not saved correctly", data)
+        else:
+            self.log_test("Invoice with From Fields", False, "Failed to create invoice with from fields", data)
+
+    def test_invoice_email_sending(self):
+        """Test POST /api/invoices/:id/send-email endpoint"""
+        if not self.session_token or not self.test_invoice_id:
+            self.log_test("Invoice Email Sending", False, "Skipped - no auth token or invoice")
+            return
+
+        email_data = {
+            "invoice_id": self.test_invoice_id,
+            "recipient_email": "test@example.com",
+            "subject": "Test Invoice Email",
+            "message": "This is a test email for invoice sending."
+        }
+
+        success, data = self.make_request('POST', f'/invoices/{self.test_invoice_id}/send-email', email_data)
+        if success:
+            # Should return success or skipped status (if RESEND_API_KEY is demo)
+            status = data.get('status')
+            if status in ['success', 'skipped']:
+                self.log_test("Invoice Email Sending", True, 
+                            f"Email endpoint working - Status: {status}")
+            else:
+                self.log_test("Invoice Email Sending", False, 
+                            f"Unexpected email status: {status}", data)
+        else:
+            self.log_test("Invoice Email Sending", False, "Email sending endpoint failed", data)
+
+    def test_recurring_invoice_configuration(self):
+        """Test POST /api/invoices/:id/set-recurring endpoint"""
+        if not self.session_token or not self.test_invoice_id:
+            self.log_test("Recurring Invoice Config", False, "Skipped - no auth token or invoice")
+            return
+
+        recurring_data = {
+            "enabled": True,
+            "frequency": "monthly",
+            "end_date": (datetime.now() + timedelta(days=365)).strftime("%Y-%m-%d")
+        }
+
+        success, data = self.make_request('POST', f'/invoices/{self.test_invoice_id}/set-recurring', recurring_data)
+        if success and data.get('recurring'):
+            recurring = data['recurring']
+            if (recurring.get('enabled') == True and 
+                recurring.get('frequency') == "monthly"):
+                self.log_test("Recurring Invoice Configuration", True, 
+                            "Recurring invoice configured successfully")
+            else:
+                self.log_test("Recurring Invoice Configuration", False, 
+                            "Recurring configuration not saved correctly", data)
+        else:
+            self.log_test("Recurring Invoice Configuration", False, 
+                        "Failed to configure recurring invoice", data)
+
+    def test_google_pay_checkout(self):
+        """Test Google Pay payment method in checkout"""
+        if not self.session_token:
+            self.log_test("Google Pay Checkout", False, "Skipped - no authentication token")
+            return
+
+        checkout_data = {
+            "plan": "professional",
+            "origin_url": self.base_url,
+            "payment_method": "google_pay"
+        }
+
+        success, data = self.make_request('POST', '/payments/stripe/create-checkout', checkout_data)
+        if success and data.get('url') and data.get('session_id'):
+            self.log_test("Google Pay Checkout", True, 
+                        "Google Pay checkout session created successfully")
+        else:
+            self.log_test("Google Pay Checkout", False, 
+                        "Failed to create Google Pay checkout session", data)
+
+    def test_stats_with_recurring_count(self):
+        """Test stats endpoint includes recurring_invoices count"""
+        if not self.session_token:
+            self.log_test("Stats with Recurring Count", False, "Skipped - no authentication token")
+            return
+
+        success, data = self.make_request('GET', '/stats')
+        if success and isinstance(data, dict):
+            if 'recurring_invoices' in data:
+                recurring_count = data.get('recurring_invoices', 0)
+                self.log_test("Stats with Recurring Count", True, 
+                            f"Stats includes recurring count: {recurring_count}")
+            else:
+                self.log_test("Stats with Recurring Count", False, 
+                            "Stats missing recurring_invoices field", data)
+        else:
+            self.log_test("Stats with Recurring Count", False, "Stats endpoint not working", data)
 
     def create_mock_session(self):
         """Create a mock session for testing (since we can't do real OAuth in tests)"""
