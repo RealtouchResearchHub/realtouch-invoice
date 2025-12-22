@@ -45,7 +45,7 @@ export default function LoginPage() {
             <img 
               src="https://customer-assets.emergentagent.com/job_77cf16cd-eadc-4d0e-b24f-9448ffa83e9e/artifacts/8fhvo7zu_image.png"
               alt="Realtouch Invoice"
-              className="h-16 w-auto mx-auto mb-4 brightness-0 invert"
+              className="h-16 w-auto mx-auto mb-4"
             />
             <h1 className="font-space-mono text-2xl font-bold text-white">
               Realtouch Invoice
