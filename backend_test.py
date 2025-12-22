@@ -116,6 +116,101 @@ class RealtouchInvoiceAPITester:
         else:
             self.log_test("Auth Me Endpoint", False, "Failed to authenticate with test token", data)
 
+    def test_email_password_signup(self):
+        """Test POST /api/auth/signup with email and password"""
+        # Use unique email for each test run
+        test_email = f"testuser_{datetime.now().strftime('%Y%m%d_%H%M%S')}@example.com"
+        
+        signup_data = {
+            "name": "Test User",
+            "email": test_email,
+            "password": "TestPass123!"
+        }
+
+        success, data = self.make_request('POST', '/auth/signup', signup_data, 200)
+        if success and data.get('user') and data.get('session_token'):
+            user = data['user']
+            if (user.get('email') == test_email and 
+                user.get('name') == "Test User" and
+                user.get('auth_provider') == 'email'):
+                self.log_test("Email/Password Signup", True, 
+                            f"User created successfully: {user.get('name')} ({user.get('email')})")
+                # Store session token for subsequent tests
+                self.signup_session_token = data['session_token']
+                self.signup_user_email = test_email
+                return True
+            else:
+                self.log_test("Email/Password Signup", False, 
+                            "User data incorrect in response", data)
+        else:
+            self.log_test("Email/Password Signup", False, "Signup failed", data)
+        return False
+
+    def test_email_password_login(self):
+        """Test POST /api/auth/login with email and password"""
+        if not hasattr(self, 'signup_user_email'):
+            self.log_test("Email/Password Login", False, "Skipped - no signup user available")
+            return False
+
+        login_data = {
+            "email": self.signup_user_email,
+            "password": "TestPass123!"
+        }
+
+        success, data = self.make_request('POST', '/auth/login', login_data, 200)
+        if success and data.get('user') and data.get('session_token'):
+            user = data['user']
+            if (user.get('email') == self.signup_user_email and 
+                user.get('name') == "Test User"):
+                self.log_test("Email/Password Login", True, 
+                            f"Login successful: {user.get('name')} ({user.get('email')})")
+                return True
+            else:
+                self.log_test("Email/Password Login", False, 
+                            "Login response data incorrect", data)
+        else:
+            self.log_test("Email/Password Login", False, "Login failed", data)
+        return False
+
+    def test_login_with_wrong_password(self):
+        """Test login with wrong password should fail"""
+        if not hasattr(self, 'signup_user_email'):
+            self.log_test("Wrong Password Login", False, "Skipped - no signup user available")
+            return
+
+        login_data = {
+            "email": self.signup_user_email,
+            "password": "WrongPassword123!"
+        }
+
+        success, data = self.make_request('POST', '/auth/login', login_data, 401)
+        if success:
+            self.log_test("Wrong Password Protection", True, 
+                        "Login correctly rejected with wrong password")
+        else:
+            self.log_test("Wrong Password Protection", False, 
+                        "Login should have failed with wrong password", data)
+
+    def test_signup_duplicate_email(self):
+        """Test signup with duplicate email should fail"""
+        if not hasattr(self, 'signup_user_email'):
+            self.log_test("Duplicate Email Signup", False, "Skipped - no signup user available")
+            return
+
+        signup_data = {
+            "name": "Another User",
+            "email": self.signup_user_email,  # Same email as before
+            "password": "AnotherPass123!"
+        }
+
+        success, data = self.make_request('POST', '/auth/signup', signup_data, 400)
+        if success and "already registered" in str(data.get('detail', '')).lower():
+            self.log_test("Duplicate Email Protection", True, 
+                        "Signup correctly rejected duplicate email")
+        else:
+            self.log_test("Duplicate Email Protection", False, 
+                        "Signup should have failed with duplicate email", data)
+
     def test_user_profile_update(self):
         """Test PUT /api/user/profile with company_details"""
         if not self.session_token:
