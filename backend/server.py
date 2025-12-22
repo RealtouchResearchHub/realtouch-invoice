@@ -763,15 +763,15 @@ async def signup(user_data: UserSignup, response: Response):
         max_age=7 * 24 * 60 * 60
     )
     
-    # Remove sensitive data from response
-    user_response = {k: v for k, v in new_user.items() if k != "password_hash"}
-    user_response["is_owner"] = is_owner(user_response)
-    user_response["effective_plan"] = get_effective_plan(user_response)
+    # Fetch user without _id and password_hash
+    user_doc = await db.users.find_one({"user_id": user_id}, {"_id": 0, "password_hash": 0})
+    user_doc["is_owner"] = is_owner(user_doc)
+    user_doc["effective_plan"] = get_effective_plan(user_doc)
     
     # Send verification email
     asyncio.create_task(send_verification_email(user_data.email, user_data.name))
     
-    return {"user": user_response, "session_token": session_token}
+    return {"user": user_doc, "session_token": session_token}
 
 @api_router.post("/auth/login")
 async def login(user_data: UserLogin, response: Response):
