@@ -636,27 +636,6 @@ export default function Dashboard({ user, setUser }) {
 
         {activeTab === "settings" && (
           <SettingsPage user={user} setUser={setUser} onUpgrade={() => setShowUpgradeModal(true)} />
-                    {user?.plan === "starter" ? "Starter Plan" : 
-                     user?.plan === "professional" ? "Professional Plan" : "Enterprise Plan"}
-                  </p>
-                  <p className="text-sm text-slate-500">
-                    {user?.plan === "starter" 
-                      ? "5 downloads total (permanent limit)" 
-                      : "Unlimited downloads"}
-                  </p>
-                </div>
-                {user?.plan === "starter" && (
-                  <Button 
-                    onClick={() => setShowUpgradeModal(true)}
-                    className="bg-[#0066cc] hover:bg-[#0052a3] text-white"
-                    data-testid="settings-upgrade-btn"
-                  >
-                    Upgrade
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
         )}
       </main>
 
