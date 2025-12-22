@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { 
   FileText, Users, BarChart3, Settings, LogOut, Plus, Search,
   Download, Edit, Trash2, Eye, ChevronDown, X, AlertCircle,
-  DollarSign, Clock, TrendingUp, CreditCard, Mail, Upload, RefreshCw
+  DollarSign, Clock, TrendingUp, CreditCard, Mail, Upload, RefreshCw, Home
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,7 @@ import InvoiceEditor from "@/components/InvoiceEditor";
 import CustomerManager from "@/components/CustomerManager";
 import UpgradeModal from "@/components/UpgradeModal";
 import SettingsPage from "@/components/SettingsPage";
+import DashboardHome from "@/components/DashboardHome";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -42,9 +43,10 @@ export default function Dashboard({ user, setUser }) {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // State
-  const [activeTab, setActiveTab] = useState("invoices");
+  // State - Default to dashboard (home) tab
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [invoices, setInvoices] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
