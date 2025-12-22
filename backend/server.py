@@ -44,6 +44,20 @@ OWNER_EMAIL = os.environ.get('OWNER_EMAIL', '')  # Product owner email - gets un
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
 
+def hash_password(password: str) -> str:
+    """Hash password using SHA256 with salt"""
+    salt = secrets.token_hex(16)
+    hashed = hashlib.sha256((password + salt).encode()).hexdigest()
+    return f"{salt}${hashed}"
+
+def verify_password(password: str, stored_hash: str) -> bool:
+    """Verify password against stored hash"""
+    try:
+        salt, hashed = stored_hash.split('$')
+        return hashlib.sha256((password + salt).encode()).hexdigest() == hashed
+    except:
+        return False
+
 def is_owner(user: dict) -> bool:
     """Check if user is the product owner (unlimited access)"""
     if not OWNER_EMAIL:
