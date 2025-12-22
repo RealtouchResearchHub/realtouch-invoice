@@ -484,7 +484,7 @@ class RealtouchInvoiceAPITester:
 
     def run_all_tests(self):
         """Run all test suites"""
-        print("🚀 Starting Realtouch Invoice API Tests")
+        print("🚀 Starting Realtouch Invoice Phase 2 API Tests")
         print(f"📍 Testing against: {self.base_url}")
         print("=" * 60)
 
@@ -498,15 +498,37 @@ class RealtouchInvoiceAPITester:
         # Document types test
         self.test_document_types_support()
         
-        # Try to create mock session (will likely fail in test environment)
+        # Check if we have auth token
         has_auth = self.create_mock_session()
         
-        # Auth-required tests (will be skipped without auth)
-        self.test_invoice_crud_operations()
-        self.test_customer_crud_operations()
-        self.test_download_limit_enforcement()
-        self.test_stats_endpoint()
-        self.test_stripe_checkout_creation()
+        if has_auth:
+            # Phase 2: New authentication tests
+            self.test_auth_me_with_token()
+            
+            # Phase 2: Settings endpoints
+            self.test_user_profile_update()
+            self.test_logo_upload_endpoint()
+            
+            # Phase 2: Enhanced invoice features
+            self.test_invoice_with_from_fields()
+            self.test_invoice_email_sending()
+            self.test_recurring_invoice_configuration()
+            
+            # Phase 2: Payment enhancements
+            self.test_google_pay_checkout()
+            
+            # Phase 2: Enhanced stats
+            self.test_stats_with_recurring_count()
+            
+            # Original auth-required tests
+            self.test_invoice_crud_operations()
+            self.test_customer_crud_operations()
+            self.test_download_limit_enforcement()
+            self.test_stats_endpoint()
+            self.test_stripe_checkout_creation()
+        else:
+            # Skip auth-required tests
+            self.log_test("Phase 2 Features", False, "Skipped - no authentication available")
 
         # Print summary
         print("\n" + "=" * 60)
