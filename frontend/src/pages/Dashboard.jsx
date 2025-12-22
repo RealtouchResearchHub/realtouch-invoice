@@ -281,6 +281,9 @@ export default function Dashboard({ user, setUser }) {
       ? "warning" 
       : "normal";
 
+  // Get company name for display
+  const companyName = user?.company_details?.trading_name || user?.company_details?.name || "Realtouch Invoice";
+
   return (
     <div className="flex min-h-screen bg-[#F8FAFC]" data-testid="dashboard">
       {/* Sidebar */}
@@ -292,10 +295,24 @@ export default function Dashboard({ user, setUser }) {
             alt="Realtouch Invoice"
             className="h-10 w-auto brightness-0 invert"
           />
+          <p className="text-xs text-slate-400 mt-2 truncate">{companyName}</p>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2">
+          <button
+            onClick={() => setActiveTab("dashboard")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              activeTab === "dashboard" 
+                ? "bg-[#0066cc] text-white" 
+                : "text-slate-400 hover:text-white hover:bg-slate-800"
+            }`}
+            data-testid="nav-dashboard-btn"
+          >
+            <Home size={20} />
+            <span>Dashboard</span>
+          </button>
+
           <button
             onClick={() => setActiveTab("invoices")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
