@@ -616,6 +616,14 @@ class RealtouchInvoiceAPITester:
             # Phase 2: New authentication tests
             self.test_auth_me_with_token()
             
+            # NEW: Email/Password Authentication Tests
+            print("\n🔐 Testing Email/Password Authentication...")
+            signup_success = self.test_email_password_signup()
+            if signup_success:
+                self.test_email_password_login()
+                self.test_login_with_wrong_password()
+                self.test_signup_duplicate_email()
+            
             # Phase 2: Settings endpoints
             self.test_user_profile_update()
             self.test_logo_upload_endpoint()
