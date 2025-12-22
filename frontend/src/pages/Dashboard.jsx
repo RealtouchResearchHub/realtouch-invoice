@@ -68,6 +68,7 @@ export default function Dashboard({ user, setUser }) {
     fetchInvoices();
     fetchStats();
     fetchUser();
+    fetchCustomers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, typeFilter]);
 
@@ -80,6 +81,18 @@ export default function Dashboard({ user, setUser }) {
       }
     } catch (error) {
       console.error("Failed to fetch user:", error);
+    }
+  };
+
+  const fetchCustomers = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/customers`, { credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        setCustomers(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch customers:", error);
     }
   };
 
