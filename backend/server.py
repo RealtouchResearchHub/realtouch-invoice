@@ -36,10 +36,23 @@ JWT_SECRET = os.environ.get('JWT_SECRET', 'realtouch_invoice_jwt_secret_key')
 STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', 'sk_test_emergent')
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
+OWNER_EMAIL = os.environ.get('OWNER_EMAIL', '')  # Product owner email - gets unlimited access
 
 # Initialize Resend
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
+
+def is_owner(user: dict) -> bool:
+    """Check if user is the product owner (unlimited access)"""
+    if not OWNER_EMAIL:
+        return False
+    return user.get('email', '').lower() == OWNER_EMAIL.lower() or user.get('role') == 'owner'
+
+def get_effective_plan(user: dict) -> str:
+    """Get effective plan - owners always have enterprise access"""
+    if is_owner(user):
+        return 'owner'  # Owner plan = unlimited everything
+    return user.get('plan', 'starter')
 
 # Create the main app
 app = FastAPI()
