@@ -655,6 +655,10 @@ async def create_session(request: Request, response: Response):
     
     user_doc = await db.users.find_one({"user_id": user_id}, {"_id": 0})
     
+    # Add owner status to response
+    user_doc["is_owner"] = is_owner(user_doc)
+    user_doc["effective_plan"] = get_effective_plan(user_doc)
+    
     # Send verification email for new users
     if is_new_user:
         asyncio.create_task(send_verification_email(auth_data["email"], auth_data.get("name", "User")))
@@ -663,6 +667,9 @@ async def create_session(request: Request, response: Response):
 
 @api_router.get("/auth/me")
 async def get_me(user: dict = Depends(get_current_user)):
+    # Add owner status
+    user["is_owner"] = is_owner(user)
+    user["effective_plan"] = get_effective_plan(user)
     return user
 
 @api_router.post("/auth/logout")
