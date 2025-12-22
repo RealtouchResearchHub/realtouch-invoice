@@ -57,13 +57,29 @@ export default function Dashboard({ user, setUser }) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [viewingInvoice, setViewingInvoice] = useState(null);
+  const [showEmailModal, setShowEmailModal] = useState(null);
+  const [emailData, setEmailData] = useState({ recipient_email: "", subject: "", message: "" });
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   // Fetch data
   useEffect(() => {
     fetchInvoices();
     fetchStats();
+    fetchUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, typeFilter]);
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/me`, { credentials: 'include' });
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      }
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+    }
+  };
 
   const fetchInvoices = async () => {
     try {
