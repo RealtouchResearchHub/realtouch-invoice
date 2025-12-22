@@ -22,6 +22,8 @@ import json
 import base64
 import asyncio
 import resend
+import hashlib
+import secrets
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
