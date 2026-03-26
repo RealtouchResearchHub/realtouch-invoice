@@ -415,28 +415,45 @@ async def send_invoice_email(invoice: dict, recipient_email: str, pdf_bytes: byt
 # ========== PDF GENERATION ==========
 
 def generate_invoice_pdf(invoice: dict, user: dict = None) -> BytesIO:
-    """Generate professional PDF with blue header"""
+    """Generate professional PDF with blue header and user logo"""
+    from reportlab.lib.utils import ImageReader
+    
     buffer = BytesIO()
     
     # Create PDF with custom canvas
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
     
-    # Blue header bar
+    # Blue header bar at top
     c.setFillColor(colors.HexColor('#0066cc'))
     c.rect(0, height - 60, width, 60, fill=True, stroke=False)
     
-    # Company logo (if available)
-    logo_x = width - 150
-    logo_y = height - 130
+    # Blue footer bar at bottom
+    c.setFillColor(colors.HexColor('#0066cc'))
+    c.rect(0, 0, width, 30, fill=True, stroke=False)
+    
+    # Company logo (if available) - positioned in top right
+    logo_x = width - 120
+    logo_y = height - 140
+    logo_drawn = False
+    
     if user and user.get('company_logo'):
         try:
-            import base64
-            logo_data = base64.b64decode(user['company_logo'].split(',')[-1])
+            logo_data_str = user['company_logo']
+            # Handle both data URL and raw base64
+            if ',' in logo_data_str:
+                logo_base64 = logo_data_str.split(',')[-1]
+            else:
+                logo_base64 = logo_data_str
+            
+            logo_data = base64.b64decode(logo_base64)
             logo_buffer = BytesIO(logo_data)
-            c.drawImage(logo_buffer, logo_x, logo_y, width=80, height=80, preserveAspectRatio=True)
-        except:
-            pass
+            logo_image = ImageReader(logo_buffer)
+            c.drawImage(logo_image, logo_x, logo_y, width=70, height=70, preserveAspectRatio=True, mask='auto')
+            logo_drawn = True
+            logger.info("Logo successfully added to PDF")
+        except Exception as e:
+            logger.error(f"Failed to add logo to PDF: {str(e)}")
     
     # Company details (From section)
     y_pos = height - 100
