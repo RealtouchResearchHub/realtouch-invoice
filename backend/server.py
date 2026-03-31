@@ -1227,7 +1227,7 @@ async def delete_customer(
 # ========== PAYMENT ENDPOINTS ==========
 
 PAYMENT_PACKAGES = {
-    "professional": 8.99,
+    "professional": 6.99,
     "enterprise": 59.99
 }
 

@@ -74,7 +74,7 @@ export default function LandingPage() {
     },
     {
       name: "Professional",
-      price: "£8.99",
+      price: "£6.99",
       period: "/month",
       description: "For growing businesses",
       features: [
